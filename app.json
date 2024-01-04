@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "Meet Chess",
+    "slug": "meet-chess",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#222222",
+    "androidStatusBar": {
+      "barStyle": "light-content",
+      "backgroundColor": "#222222"
+    },
+    "androidNavigationBar": {
+      "backgroundColor": "#222222"
+    },
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#222222"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "userInterfaceStyle": "dark",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#222222"
+      },
+      "package": "com.meetchess.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-av", "expo-camera"],
+    "extra": {
+      "eas": {
+        "projectId": "a3547453-e8b0-4fff-b80b-8611153c90a7"
+      }
+    },
+    "owner": "bala-devops"
+  }
+}
