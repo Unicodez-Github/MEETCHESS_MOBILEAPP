@@ -1,6 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { Text, TouchableOpacity, ScrollView, Switch, TextInput, KeyboardAvoidingView, View } from 'react-native';
+import { Text, TouchableOpacity, ScrollView, Switch, TextInput, KeyboardAvoidingView, View, BackHandler } from 'react-native';
 import { Feather } from '@expo/vector-icons'; 
 import { Header, Loader, SearchList } from '../../factory';
 import { createDoc, getGroupedStudents } from '../../service';
@@ -43,6 +43,14 @@ const Create = ({doc = null, onClose=()=>{}}) => {
     }, user?.id));
   };
 
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      onClose()
+      return true
+    })
+    return () => backHandler.remove()
+  }, [])
+  
   return (
     <KeyboardAvoidingView style={{...s.f1, ...s.bc2}} behavior='padding' keyboardVerticalOffset={50}>
       <Header filter={false} title='Create' onBack={() => onClose()}>
@@ -51,7 +59,7 @@ const Create = ({doc = null, onClose=()=>{}}) => {
           <Text>SAVE</Text>
         </TouchableOpacity>
       </Header>
-      <ScrollView showsVerticalScrollIndicator={false} nestedScrollEnabled={true} style={s.m8}>
+      <ScrollView overScrollMode='never' showsVerticalScrollIndicator={false} nestedScrollEnabled={true} style={s.m8}>
         <TextInput
           placeholderTextColor='#666'
           placeholder='Session Name'

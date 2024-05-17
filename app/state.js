@@ -29,3 +29,8 @@ export const SessnState = atom({
   key: 'sessn',
   default: null
 });
+
+export const SetngState = atom({
+  key: 'setng',
+  default: ['red', 'darkorange']
+});

@@ -1,4 +1,6 @@
-// import 'expo-dev-client';
+import 'expo-dev-client';
+import notifee from '@notifee/react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { PaperProvider, MD3DarkTheme } from 'react-native-paper';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
@@ -11,7 +13,13 @@ import { AcademyState, GroupsState, UserState, UsersState } from './app/state';
 import Login from './app/pages/login';
 import Home from './app/pages/home';
 import Session from './app/pages/session';
+import Assignment from './app/pages/assignment';
+import Tournament from './app/pages/tournament';
 import s from './app/style';
+
+notifee.registerForegroundService(notification => {
+	return new Promise(() => {})
+})
 
 const Stack = createNativeStackNavigator();
 
@@ -56,18 +64,22 @@ const Root = ({navigation}) => {
 
 const App = () => (
   <RecoilRoot>
-    <PaperProvider theme={{...MD3DarkTheme, colors: {...MD3DarkTheme.colors, primary: '#DDD'}}}>
-      <SafeAreaProvider>
-        <SafeAreaView style={{...s.f1, ...s.bc2}}>
-          <NavigationContainer>
-            <Stack.Navigator initialRouteName='Root' screenOptions={{headerShown: false, statusBarColor: '#222222', navigationBarColor: '#222222'}}>
-              <Stack.Screen name='Root' component={Root} />
-              <Stack.Screen name='Session' component={Session} />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </SafeAreaView>
-      </SafeAreaProvider>
-    </PaperProvider>
+    <GestureHandlerRootView style={s.fg1}>
+      <PaperProvider theme={{...MD3DarkTheme, colors: {...MD3DarkTheme.colors, primary: '#DDD'}}}>
+        <SafeAreaProvider>
+          <SafeAreaView style={{...s.f1, ...s.bc2}}>
+            <NavigationContainer>
+              <Stack.Navigator initialRouteName='Root' screenOptions={{headerShown: false, statusBarColor: '#222222', navigationBarColor: '#222222'}}>
+                <Stack.Screen name='Root' component={Root} />
+                <Stack.Screen name='Session' component={Session} />
+                <Stack.Screen name='Assignment' component={Assignment} />
+                <Stack.Screen name='Tournament' component={Tournament} />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </SafeAreaView>
+        </SafeAreaProvider>
+      </PaperProvider>
+    </GestureHandlerRootView>
   </RecoilRoot>
 );
 

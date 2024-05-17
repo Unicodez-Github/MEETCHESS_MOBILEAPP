@@ -10,8 +10,8 @@ import s from '../../style';
 
 const Login = () => {
   const setUser = useSetRecoilState(UserState);
-  const [username, setUsername] = useState('bala');
-  const [password, setPassword] = useState('Bala@1991');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [usernameError, setUsernameError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
   const [progress, setProgress] = useState(false);
@@ -47,7 +47,7 @@ const Login = () => {
 
   return (
     <ImageBackground source={chess} style={s.f1} resizeMode='repeat'>
-      <ScrollView contentContainerStyle={{...s.fg1, ...s.jcc}} style={s.bc2e}>
+      <ScrollView overScrollMode='never' contentContainerStyle={{...s.fg1, ...s.jcc}} style={s.bc2e}>
         {progress ? <Progress /> : <View style={{...s.m16, ...s.p16, ...s.br8, ...s.bc4d}}>
           <View style={{...s.bce, ...s.asc, ...s.aic, ...s.jcc, width: 52, height: 52, borderRadius: 26}}>
             <Feather name='lock' size={30} color='#FFF' />

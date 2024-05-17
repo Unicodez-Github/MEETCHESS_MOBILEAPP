@@ -2,7 +2,7 @@
   "expo": {
     "name": "Meet Chess",
     "slug": "meet-chess",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -31,12 +31,24 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#222222"
       },
-      "package": "com.meetchess.app"
+      "package": "com.meetchess.app",
+      "permissions": [
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
+        "android.permission.FOREGROUND_SERVICE_CAMERA",
+        "android.permission.FOREGROUND_SERVICE_MICROPHONE"
+      ],
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-av", "expo-camera"],
+    "plugins": ["expo-av", "expo-camera", "./plugins/service", [
+      "@config-plugins/react-native-webrtc",
+      {
+        "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+        "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+      }
+    ]],
     "extra": {
       "eas": {
         "projectId": "a3547453-e8b0-4fff-b80b-8611153c90a7"

@@ -26,7 +26,7 @@ const Jitsi = () => {
   // }, []);
 
   return <View style={{height: 400}}>
-    {progress ? <Progress /> : <WebView useWebView2 originWhitelist={['*']}
+    {progress ? <Progress /> : <WebView useWebView2 originWhitelist={['*']} overScrollMode='never'
                 allowsInlineMediaPlayback style={{height: '100%'}} source={{uri}} />}
   </View>;
 };

@@ -1,17 +1,14 @@
 import { Chess } from 'chess.js';
+const validSquare = (square) => typeof square === 'string' && square.search(/^[a-h][1-8]$/) !== -1
 
-const columns = 'abcdefgh'.split('');
+const validPiece = (code) => typeof code === 'string' && code.search(/^[bw][KQRNBP]$/) !== -1
 
-const validSquare = (square) => typeof square === 'string' && square.search(/^[a-h][1-8]$/) !== -1;
-
-const validPiece = (code) => typeof code === 'string' && code.search(/^[bw][KQRNBP]$/) !== -1;
-
-const fenToPieceCode = (piece) => piece.toLowerCase() === piece ? `b${piece.toUpperCase()}` : `w${piece.toUpperCase()}`;
+const fenToPieceCode = (piece) => piece.toLowerCase() === piece ? `b${piece.toUpperCase()}` : `w${piece.toUpperCase()}`
 
 const pieceCodeToFen = (piece) => {
-  const [color, code] = piece.split('');
-  return `${color === 'w' ? code.toUpperCase() : code.toLowerCase()}`;
-};
+  const [color, code] = piece.split('')
+  return `${color === 'w' ? code.toUpperCase() : code.toLowerCase()}`
+}
 
 const expandFenEmptySquares = (fen) => {
   return `${fen}`.replace(/8/g, '11111111')
@@ -20,8 +17,8 @@ const expandFenEmptySquares = (fen) => {
   .replace(/5/g, '11111')
   .replace(/4/g, '1111')
   .replace(/3/g, '111')
-  .replace(/2/g, '11');
-};
+  .replace(/2/g, '11')
+}
 
 const squeezeFenEmptySquares = (fen) => {
   return `${fen}`.replace(/11111111/g, '8')
@@ -30,89 +27,119 @@ const squeezeFenEmptySquares = (fen) => {
   .replace(/11111/g, '5')
   .replace(/1111/g, '4')
   .replace(/111/g, '3')
-  .replace(/11/g, '2');
-};
+  .replace(/11/g, '2')
+}
 
 const validFen = (fen) => {
-  if (typeof fen !== 'string') return false;
-  const chunks = expandFenEmptySquares(fen.replace(/ .+$/, '')).split('/');
-  if (chunks.length !== 8) return false;
-  if (chunks.find(e => !e || !e.length || e.length !== 8 || e.search(/[^kqrnbpKQRNBP1]/) !== -1)) return false;
-  return true;
-};
+  if (typeof fen !== 'string') return false
+  const chunks = expandFenEmptySquares(fen.replace(/ .+$/, '')).split('/')
+  if (chunks.length !== 8) return false
+  if (chunks.find(e => !e || !e.length || e.length !== 8 || e.search(/[^kqrnbpKQRNBP1]/) !== -1)) return false
+  return true
+}
 
 const validPosition = (pos) => {
-  if (typeof pos !== 'object') return false;
-  return Object.entries(pos).every(([square, piece]) => validSquare(square) && validPiece(piece));
-};
+  if (typeof pos !== 'object') return false
+  return Object.entries(pos).every(([square, piece]) => validSquare(square) && validPiece(piece))
+}
 
-export const emptyFen = '8/8/8/8/8/8/8/8 w - - 0 1';
+export const emptyFen = '8/8/8/8/8/8/8/8 w - - 0 1'
 
-export const startFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+export const startFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
+export const cols = 'abcdefgh'.split('')
+
+export const rows = '87654321'.split('')
 
 export const fenToObj = (fen) => {
-  if (fen === 'start') fen = startFen;
-  if (!validFen(fen)) return {};
-  let position = {};
-  let currentRow = 8;
-  fen.replace(/ .+$/, '').split('/').forEach(row => {
-    let colIndex = 0;
-    row.split('').forEach(col => {
-      if (col.search(/[1-8]/) !== -1) {
-        colIndex = colIndex + parseInt(col, 10);
-      } else {
-        position[`${columns[colIndex]}${currentRow}`] = fenToPieceCode(col);
-        colIndex++;
-      }
-    });
-    currentRow--;
-  }); return position;
-};
+  let obj = {}
+  if (fen === 'start') fen = startFen
+  if (validFen(fen)) {
+    let rind = 8
+    fen.replace(/ .+$/, '').split('/').forEach(row => {
+      let cind = 0
+      row.split('').forEach(col => {
+        if (col.search(/[1-8]/) !== -1) {
+          cind = cind + parseInt(col, 10)
+        } else {
+          obj[`${cols[cind]}${rind}`] = fenToPieceCode(col)
+          cind++
+        }
+      })
+      rind--
+    })
+  } return obj
+}
 
 export const objToFen = (obj) => {
-  if (!validPosition(obj)) return '';
-  let fen = '';
-  let currentRow = 8;
-  for (let i = 0; i < 8; i++) {
-    for (let j = 0; j < 8; j++) {
-      const square = `${columns[j]}${currentRow}`;
-      if (obj.hasOwnProperty(square)) {
-        fen += pieceCodeToFen(obj[square]);
-      } else {
-        fen += '1';
-      }
-    }
-    if (i !== 7) fen += '/';
-    currentRow--;
-  } return squeezeFenEmptySquares(fen);
-};
+  if (!validPosition(obj)) return ''
+  let fen = ''
+  rows.forEach(row => {
+    cols.forEach(col => {
+      const piece = obj[`${col}${row}`]
+      fen += piece ? pieceCodeToFen(piece) : '1'
+    })
+    if (row !== '1') fen += '/'
+  })
+  return squeezeFenEmptySquares(fen)
+}
 
 export const getAnimations = (oldPos = {}, newPos = {}) => {
-  const prev = { ...oldPos }, next = { ...newPos }, add = [], mov = [];
+  const prev = {...oldPos}, next = {...newPos}, add = [], mov = []
   Object.keys(next).forEach(key => {
-    if (!next.hasOwnProperty(key) || !next[key]) { delete next[key]; };
-    if (prev.hasOwnProperty(key) && prev[key] === next[key]) { delete next[key]; delete prev[key]; }
-  });
-  const search = Object.entries(prev).filter(([key, val]) => key && val);
-  Object.keys(next).forEach(to => {
-    const index = search.findIndex(([_, val]) => val === next[to]);
-    if (index >= 0) {
-      const [from, piece] = search[index];
-      mov.push({ from, to, piece });
-      search.splice(index, 1);
-      delete next[to]; delete prev[from];
-    } else {
-      add.push({ to, piece: next[to] });
-      delete next[to];
+    if (!next.hasOwnProperty(key) || !next[key]) delete next[key]
+    if (prev.hasOwnProperty(key) && prev[key] === next[key]) {
+      delete next[key]
+      delete prev[key]
     }
-  });
-  return { add, mov, rem: search.map(([from, piece]) => ({ from, piece })) };
-};
+  })
+  const search = Object.entries(prev).filter(([key, val]) => key && val)
+  Object.keys(next).forEach(to => {
+    const index = search.findIndex(([_, val]) => val === next[to])
+    if (index >= 0) {
+      const [from, piece] = search[index]
+      mov.push({from, to, piece})
+      search.splice(index, 1)
+      delete next[to]
+      delete prev[from]
+    } else {
+      add.push({to, piece: next[to]})
+      delete next[to]
+    }
+  })
+  return {add, mov, rem: search.map(([from, piece]) => ({from, piece}))}
+}
+
+export const getPosition = (oldPos = {}, newPos = {}) => {
+  const prev = {...oldPos}, next = {...newPos}, data = []
+  Object.keys(next).forEach(key => {
+    if (prev[key] === next[key]) {
+      data.push({from: key, to: key, piece: next[key]})
+      delete next[key]
+      delete prev[key]
+    }
+  })
+  const search = Object.entries(prev)
+  Object.keys(next).forEach(key => {
+    const index = search.findIndex(([_, val]) => val === next[key])
+    if (index >= 0) {
+      const [from, piece] = search[index]
+      data.push({from, to: key, piece})
+      search.splice(index, 1)
+      delete next[key]
+      delete prev[from]
+    } else {
+      data.push({from: key, to: key, piece: next[key]})
+      delete next[key]
+    }
+  })
+  return {data, captured: search.length ? true : false}
+}
 
 export const getPawnStructure = (fen) => {
-  const obj = Object.entries(fenToObj(fen)).filter(([key, val]) => key && val && (val === 'wP' || val === 'bP'));
-  return objToFen(Object.fromEntries(obj));
-};
+  const obj = Object.entries(fenToObj(fen)).filter(([key, val]) => key && val && (val === 'wP' || val === 'bP'))
+  return objToFen(Object.fromEntries(obj))
+}
 
 export class Game {
   #chess;

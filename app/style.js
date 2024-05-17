@@ -34,8 +34,14 @@ export default StyleSheet.create({
     marginTop: 8,
     marginBottom: 8
   },
+  br16: {
+    borderRadius: 16
+  },
   mla: {
     marginLeft: 'auto'
+  },
+  mra: {
+    marginRight: 'auto'
   },
   p2: {
     padding: 2
@@ -69,6 +75,9 @@ export default StyleSheet.create({
   g4: {
     gap: 4,
   },
+  g5: {
+    gap: 5,
+  },
   g8: {
     gap: 8
   },
@@ -101,6 +110,12 @@ export default StyleSheet.create({
   },
   fg1: {
     flexGrow: 1
+  },
+  pna: {
+    position: 'absolute'
+  },
+  tac: {
+    textAlign: 'center'
   },
   fdr: {
     flexDirection: 'row'

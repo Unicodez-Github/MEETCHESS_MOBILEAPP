@@ -39,7 +39,7 @@ const ViewQuestion = ({question=null, participants=[], answers=[], onClose=()=>{
           <Text>END</Text>
         </TouchableOpacity>
       </View>
-      <ScrollView style={{...s.mx8, ...s.mt4, ...s.mb8}} contentContainerStyle={s.g8} horizontal={true} nestedScrollEnabled={true} showsHorizontalScrollIndicator={false}>
+      <ScrollView overScrollMode='never' style={{...s.mx8, ...s.mt4, ...s.mb8}} contentContainerStyle={s.g8} showsVerticalScrollIndicator={false} nestedScrollEnabled={true}>
         {participants.map(({ id, name, joined }) => {
           const attempts = [...answers].reverse().filter(a => a.user === id);
           const penalties = attempts.filter(({ s }) => s === 0).length * question?.penalty;
@@ -49,7 +49,7 @@ const ViewQuestion = ({question=null, participants=[], answers=[], onClose=()=>{
               <FontAwesome name='circle' color={joined ? '#90EE90' : 'red'} />
               <Text style={s.cfff} numberOfLines={1}>{name}</Text>
             </View>
-            <View style={{width: 200, height: 200}}>
+            <View>
               <Fen orientation={question?.fen.split(' ')[1]} fen={attempts.find(({ s }) => s !== 0)?.f || question?.fen}/>
             </View>
             <View style={{...s.f1, ...s.fdr, ...s.aic, ...s.g4, ...s.bc3, ...s.p4, ...s.br5}}>
@@ -58,7 +58,7 @@ const ViewQuestion = ({question=null, participants=[], answers=[], onClose=()=>{
               <MaterialCommunityIcons name='close-circle' color='red' size={24} style={s.mla} />
               <Text style={s.cfff}>-{penalties}</Text>
             </View>
-            <ScrollView style={{height: 200}} showsVerticalScrollIndicator={false} nestedScrollEnabled={true} contentContainerStyle={s.g4}>
+            <ScrollView overScrollMode='never' style={{height: 100}} showsVerticalScrollIndicator={false} nestedScrollEnabled={true} contentContainerStyle={s.g4}>
               {attempts.filter(a => a.s !== 2).map((a, i) => <View key={i} style={{...s.fdr, ...s.aic, ...s.p4, ...s.br5, backgroundColor: a.s === 0 ? '#f8bbd0' : '#b9f6ca', justifyContent: 'space-between'}}>
                 <Text>{a.m}</Text>
                 <Text style={{color: 'blue'}}>{a.t}S</Text>

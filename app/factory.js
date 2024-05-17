@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Ellipse, G, Path, Svg } from 'react-native-svg';
 import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
@@ -45,6 +45,12 @@ export const Chip = ({type='info', text=null}) => (
   </View>
 );
 
+export const Toast = ({type = 'info', text = null}) => (
+  <View style={{...s.fdr, ...s.aic, ...s.p4, ...s.g4, ...s.br20, backgroundColor: colors[type]?.at(1) || '#87CEFA'}}>
+    <Text style={{paddingBottom: 2, paddingLeft: 3, paddingRight: 3, textTransform: 'capitalize'}}>{text || type}</Text>
+  </View>
+);
+
 export const Level = ({value = 1}) => (
   <View style={{...s.fdr, ...s.aic, ...s.p4, ...s.g4, ...s.br20, backgroundColor: colors[value === 3 ? 'error' : value === 2 ? 'info' : 'success']?.at(1) || '#87CEFA'}}>
     <Text style={{...s.px4, textTransform: 'capitalize'}}>{value === 3 ? 'Advanced' : value === 2 ? 'Intermediate' : 'Beginner'}</Text>
@@ -65,10 +71,11 @@ export const Date = ({d=null, m=null, y=null, t=null}) => (
 );
 
 export const Header = ({children, icon=null, title=null, filter=true, onBack=()=>{}, onFilter=()=>{}}) => (
-  <View style={{...s.fdr, ...s.aic, ...s.g8, ...s.my8, ...s.px4, paddingRight: 8}}>
-    <TouchableOpacity onPress={onBack} style={{paddingTop: 3}}>
+  <View style={{...s.fdr, ...s.aic, ...s.g8, ...s.my8, ...s.px8}}>
+    {/* <TouchableOpacity onPress={onBack} style={{paddingTop: 3}}>
       <AntDesign name='left' color='#FFF' size={24} />
-    </TouchableOpacity>{icon}
+    </TouchableOpacity>} */}
+    {icon}
     <Text style={{...s.cfff, ...s.fs20}}>{title}</Text>
     {filter && <TouchableOpacity onPress={onFilter} style={s.mla}>
       <AntDesign name='filter' color='#F50057' size={26} />
@@ -106,7 +113,7 @@ export const SearchList = memo(({label='Search', list=[], onChange=()=>{}}) => {
           borderColor: '#CCC'
         }}
       />
-      <ScrollView showsVerticalScrollIndicator={false} nestedScrollEnabled={true} style={{height: 250}} contentContainerStyle={{...s.p8, ...s.g4}}>
+      <ScrollView overScrollMode='never' showsVerticalScrollIndicator={false} nestedScrollEnabled={true} style={{height: 250}} contentContainerStyle={{...s.p8, ...s.g4}}>
         {arr.filter(a => a.name.toLowerCase().trim().search(search?.toLowerCase().trim()) !== -1 || a.selected).map(a => <View key={a.id} style={{...s.fdr, ...s.aic, ...s.g8}}>
           <MaterialIcons name={a.selected ? 'check-box' : 'check-box-outline-blank'} size={24} color={a.selected ? '#87CEFA' : '#BBB'} onPress={() => onSelect(a)} />
           <Text style={{...s.cbbb, ...s.fs16}}>{a.name}</Text>

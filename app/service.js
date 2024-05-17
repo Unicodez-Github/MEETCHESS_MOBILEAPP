@@ -1,17 +1,36 @@
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, startAfter, updateDoc, where, writeBatch } from 'firebase/firestore';
+import { addDoc, collection, doc, documentId, getDoc, getDocs, limit, orderBy, query, serverTimestamp, startAfter, updateDoc, where, writeBatch } from 'firebase/firestore';
 import { ref, onValue } from 'firebase/database';
 import { auth, db, rdb } from './firebase';
 import { pageSize } from './constant';
 import dayjs from 'dayjs';
 
+import { Audio } from 'expo-av'
+
+export async function playSound(cap) {
+  const capSound = require('../assets/sounds/cap.mp3')
+  const movSound = require('../assets/sounds/mov.mp3')
+  const audio  = await Audio.Sound.createAsync(cap ? capSound : movSound)
+  audio.sound.playAsync()
+}
+
 export const create = (data, user) => ({
   ...data,
   createdBy: user,
+  createdAt: serverTimestamp()
+});
+
+export const update = (data, user) => ({
+  ...data,
   updatedBy: user,
-  createdAt: serverTimestamp(),
   updatedAt: serverTimestamp()
 });
+
+export const chunk = (data = [], length = 30) => {
+  const result = []; let arr = [...data];
+  while (arr.length) { result.push(arr.splice(0, length)); }
+  return result;
+}
 
 // export const uniqueArr = (arr, keys) => {
 //   const uniqueIds = new Set();
@@ -52,6 +71,10 @@ export const sortUser = (data) => {
 
 export const serverTime = () => new Promise(res => onValue(ref(rdb, '.info/serverTimeOffset'), (snap) => {
   res(dayjs(new Date().getTime() + snap.val()).unix());
+}, { onlyOnce: true }));
+
+export const timeOffset = () => new Promise(res => onValue(ref(rdb, '.info/serverTimeOffset'), (snap) => {
+  res(snap.val());
 }, { onlyOnce: true }));
 
 export const logOut = async() => {
@@ -111,10 +134,10 @@ export const createDoc = async(col, data, user) => {
   }
 };
 
-export const changeDoc = async(col, id, data) => {
+export const changeDoc = async(col, id, data, user) => {
   let result = null;
   try {
-    await updateDoc(doc(db, col, id), data);
+    await updateDoc(doc(db, col, id), update(data, user));
     result = id;
   } finally {
     return result;
@@ -130,6 +153,16 @@ export const getUsers = async(academy) => {
     return result;
   }
 };
+
+export const getDataByField = async(col = '', userId = '', field = '', data = []) => {
+  let result = [];
+  try {
+    const res = await Promise.all(chunk(data).map(e => getDocs(query(collection(db, col), where('user', '==', userId), where(field, 'in', e)))));
+    result = res.reduce((p, c) => p.concat(c.docs), []).map(e => ({...e.data(), id: e.id}));
+  } finally {
+    return result;
+  }
+}
 
 export const getDocsByField = async(col, field, order) => {
   let result = [];
@@ -168,3 +201,81 @@ export const saveAnswer = async(data) => {
     return result;
   }
 };
+
+export const getReport = async(report, user) => {
+  let result = null;
+  try {
+    const res = await getDocs(query(collection(db, 'reports'), where('user', '==', user), where('report', '==', report), limit(1)))
+    result = (res.docs || []).map(e => ({...e.data(), id: e.id})).at(0);
+  } finally {
+    return result;
+  }
+};
+
+export const uniqBy = (data, key) => {
+  return ((arr, key) => [...new Map(arr.map(x => [key(x), x])).values()])(data, e => e[key]);
+}
+
+export const findById = async(col, data) => {
+  let result = [];
+  try {
+    const res = await Promise.all(chunk(data).map(async(e) => await getDocs(query(collection(db, col), where(documentId(), 'in', e)))));
+    const temp = res.reduce((p, c) => p.concat(c.docs), []);
+    result = temp.map(e => ({ id: e.id, ...e.data()}));
+  } finally {
+    return result;
+  }
+}
+
+export const getActivities = async(assignment, user) => {
+  let result = [];
+  try {
+    const games = await findById('games', assignment.activities);
+    const ans = await getDocs(query(collection(db, 'answers'), where('assignment', '==', assignment.id), where('user', '==', user)));
+    const answers = uniqBy((ans.docs || []).map(e => ({ ...e.data(), id: e.id })), 'activity');
+    result = assignment.activities.map(act => {
+      const answer = answers.find(a => a.activity === act);
+      const game = games.find(g => g.id === act);
+      const obj = {
+        activity: act,
+        fen: game?.fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        answerId: answer ? answer.id : null,
+        score: answer ? (answer.score || 0) : 0,
+        solved: answer ? (answer.solved || false) : false,
+        attemptCount: answer ? (answer.answers || []).length : 0,
+        timeTaken: answer ? (answer.timeTaken || 0) : 0,
+        answers: answer ? (answer.answers || []) : [],
+        moves: typeof game?.moves === 'string' ? JSON.parse(game?.moves) : (game?.moves || [])
+      };
+      obj.timeUp = (assignment && assignment.maxTime && +assignment.maxTime > 0 && obj.timeTaken >= +assignment.maxTime) ? true : false;
+      obj.attemptUp = (assignment && assignment.maxAttempt && +assignment.maxAttempt > 0 && obj.attemptCount >= +assignment.maxAttempt) ? true : false;
+      return obj;
+    });
+  } finally {
+    return result;
+  }
+};
+
+export const saveReport = async(report, reportId) => {
+  let result = null;
+  try {
+    const res = reportId ? await updateDoc(doc(db, 'reports', reportId), {
+      ...report, updatedAt: serverTimestamp()
+    }) : await addDoc(collection(db, 'reports'), {
+      ...report, createdAt: serverTimestamp()
+    });
+    result = { id: reportId || res.id };
+  } finally {
+    return result;
+  }
+};
+
+export const saveAssAnswer = async(answer, answerId) => {
+  let result = null;
+  try {
+    const res = answerId ? await changeDoc('answers', answerId, answer, answer.user) : await createDoc('answers', answer, answer.user);
+    result = { id: answerId || res.id };
+  } finally {
+    return result;
+  }
+}

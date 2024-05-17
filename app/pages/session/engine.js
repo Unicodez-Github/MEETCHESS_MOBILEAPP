@@ -41,7 +41,7 @@ const Engine = ({fen = startFen}) => {
           {e.m.map((m, j) => <Text key={j}>{m} </Text>)}
         </View>
       </View>)}
-      <WebView ref={engine} onLoad={() => setReady(true)} onMessage={onMessage} source={{uri: `https://mchess-engine.netlify.app/`}} style={{height: 0}} />
+      <WebView overScrollMode='never' ref={engine} onLoad={() => setReady(true)} onMessage={onMessage} source={{uri: `https://mchess-engine.netlify.app/`}} style={{height: 0}} />
     </View>
   );
 };
