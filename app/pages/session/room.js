@@ -200,6 +200,14 @@ const Room = ({onClose = () => {}}) => {
     sendData('ctrl', { ansrs: arrayUnion(data) });
   }, []);
 
+  const onUndo = () => {
+    if (moveRef.current.moves.length > 1) {
+      const del = moveRef.current.moves.pop();
+      del?.i && game.selectMove(del.i);
+      sendData('move', {moves: moveRef.current.moves, index: game.prev() || moveRef.current.moves.at(-1).i, z: increment(1), side: false});
+    }
+  };
+
   const onFenChange = useCallback((fenstr) => {
     setShowPosition(false);
     if (fenstr) {
@@ -360,6 +368,8 @@ const Room = ({onClose = () => {}}) => {
       onDraw(null);
     } else if (data === 'ADU') {
       setAddParticipant(true)
+    } else if (data === 'UND') {
+      onUndo()
     }
   }, []);
 

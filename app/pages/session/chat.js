@@ -1,11 +1,14 @@
-import { memo } from 'react';
-import { KeyboardAvoidingView, Text, TextInput, View } from 'react-native';
-import { useRecoilValue } from 'recoil';
-import { UserState } from '../../state';
-import s from '../../style';
+import { Text, View, useWindowDimensions } from 'react-native'
+import { useRecoilValue } from 'recoil'
+import { memo } from 'react'
+import { UserState } from '../../state'
+import RenderHtml from 'react-native-render-html'
+import s from '../../style'
 
-const Chat = ({messages=[]}) => {
-  const user = useRecoilValue(UserState);
+function Chat({messages = []}) {
+  const { width } = useWindowDimensions()
+  const user = useRecoilValue(UserState)
+  
   return (
     <View style={{margin: 8}}>
       {[...messages].reverse().map((e, i) => <View key={i} style={{...s.mb8, flexDirection: e.user === user?.id ? 'row' : 'row-reverse', alignSelf: e.user === user?.id ? 'flex-start' : 'flex-end'}}>
@@ -24,13 +27,11 @@ const Chat = ({messages=[]}) => {
         }} />
         <View style={{...s.px8, ...s.br8, paddingTop: 4, paddingBottom: 6, backgroundColor: e.user === user?.id ? '#F0F8FF' : '#ADD8E6'}}>
           <Text>{e.user === user?.id ? 'You' : e.name}</Text>
-          <Text style={{...s.mt4}}>
-            {e.message}
-          </Text>
+          <View style={s.mt4}><RenderHtml source={{html: e.message}} contentWidth={width} /></View>
         </View>
       </View>)}
     </View>
-  );
-};
+  )
+}
 
-export default memo(Chat);
+export default memo(Chat)

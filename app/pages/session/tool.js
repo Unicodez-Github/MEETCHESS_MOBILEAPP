@@ -63,6 +63,9 @@ const tools = (role='G', active=[]) => [{
 }, {
   id: 'CLR', hide: role === 'G',
   icon: <MaterialIcons name='clear' color='#87CEFA' size={26} />
+}, {
+  id: 'UND', hide: role === 'G',
+  icon: <MaterialIcons name='replay' color='#87CEFA' size={26} />
 }].filter(e => e && !e.hide);
 
 const Tool = ({role='G', active=[], onPress=()=>{}}) => (

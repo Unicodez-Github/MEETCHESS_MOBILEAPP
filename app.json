@@ -23,7 +23,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.meetchess.app"
     },
     "android": {
       "userInterfaceStyle": "dark",
@@ -42,13 +43,18 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-av", "expo-camera", "./plugins/service", [
-      "@config-plugins/react-native-webrtc",
-      {
-        "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-        "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-      }
-    ]],
+    "plugins": [
+      "expo-av",
+      "expo-camera",
+      "./plugins/service",
+      [
+        "@config-plugins/react-native-webrtc",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "a3547453-e8b0-4fff-b80b-8611153c90a7"
