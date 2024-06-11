@@ -1,34 +1,44 @@
-import { memo, useCallback, useEffect, useState } from 'react';
-import { View } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { useRecoilValue } from 'recoil';
-import { AcademyState, SessnState, UserState } from '../../state';
-import { Progress } from '../../factory';
-import { apiCall } from '../../firebase';
-import dayjs from 'dayjs';
+import { memo, useCallback, useEffect, useState } from 'react'
+import { useRecoilValue } from 'recoil'
+import { View } from 'react-native'
+import { AcademyState, SessnState, UserState } from '../../state'
+import WebView from 'react-native-webview'
 
-const Jitsi = () => {
-  const user = useRecoilValue(UserState);
-  const sessn = useRecoilValue(SessnState);
-  const academy = useRecoilValue(AcademyState);
-  const [progress, setProgress] = useState(false);
-  const [uri, setUrl] = useState(`https://mchess-connect.netlify.app?rom=${sessn?.id}&adm=${user?.role !== 'G' ? 1 : 0}&dis=${user?.name}&amd=${academy?.disableAudioMute ? 1 : 0}`);
+const JWT = [
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtb2RlcmF0b3IiOnRydWUsImNvbnRleHQiOnsidXNlciI6eyJuYW1lIjoiIn19LCJyb29tIjoiKiIsImlhdCI6MTcxODEwNzU3OSwiaXNzIjoidW5pY29kZXoiLCJhdWQiOiJqaXRzaSIsImV4cCI6MTc0OTY2NTE3OSwic3ViIjoiY29ubmVjdDIubWVldGNoZXNzLmNvbSJ9.P_s4B4-iwgcgpX6rjPZDwebidaJSPM5y2iR-wKTwcS0',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtb2RlcmF0b3IiOmZhbHNlLCJjb250ZXh0Ijp7InVzZXIiOnsibmFtZSI6IiJ9fSwicm9vbSI6IioiLCJpYXQiOjE3MTgxMDc1NzksImlzcyI6InVuaWNvZGV6IiwiYXVkIjoiaml0c2kiLCJleHAiOjE3NDk2NjUxNzksInN1YiI6ImNvbm5lY3QyLm1lZXRjaGVzcy5jb20ifQ.OC9a5upHOqpGLpq7qmWdoVphffwuP8moNC_orZrG9Rc'
+]
 
-  const loadData = useCallback(async() => {
-    if (sessn?.createdBy === user.id) {
-      const jwt = sessn?.jwt || (await apiCall({type: 'JWT', room: sessn?.id, sub: 'connect.meetchess.com', exp: dayjs().add(1, 'M').unix(), user: {name: user.name}})).data;
-      setUrl(e => `${e}&jwt=${jwt}`);
-    } setProgress(false);
-  }, []);
+// allow="autoplay; camera; clipboard-write; compute-pressure; display-capture; hid; microphone; screen-wake-lock; speaker-selection"
 
-  // useEffect(() => {
-  //   loadData();
-  // }, []);
+function Jitsi() {
+  const user = useRecoilValue(UserState)
+  const sessn = useRecoilValue(SessnState)
+  const academy = useRecoilValue(AcademyState)
+  const [uri, setUrl] = useState()
 
-  return <View style={{height: 400}}>
-    {progress ? <Progress /> : <WebView useWebView2 originWhitelist={['*']} overScrollMode='never'
-                allowsInlineMediaPlayback style={{height: '100%'}} source={{uri}} />}
-  </View>;
-};
+  const loadData = useCallback(() => {
+    if (sessn?.id && user?.name && academy?.id) {
+      const obj = {
+        room: sessn.id,
+        name: user.name,
+        role: user.role,
+        audio: academy?.disableAudioMute ? 2 : 1,
+        jwt: JWT.at(sessn.createdBy === user.id ? 0 : 1)
+      }
+      setUrl(`https://mchess-jitsi.netlify.app?${Object.entries(obj).map(([k, v]) => `${k}=${v}`).join('&')}`)
+    }
+  }, [user, sessn, academy])
 
-export default memo(Jitsi);
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  return (
+    <View style={{height: 400}}>
+      {uri && <WebView useWebView2 originWhitelist={['*']} overScrollMode='never' allowsInlineMediaPlayback style={{height: '100%'}} source={{uri}} />}
+    </View>
+  )
+}
+
+export default memo(Jitsi)

@@ -89,8 +89,8 @@ const Room = ({onClose = () => {}}) => {
   const [activeTools, setActiveTools] = useState([]);
   const [moves, setMoves] = useState([]);
   const [index, setIndex] = useState('_');
-  const [jitsi, setJitsi] = useState(false);
-  const [jitsiReload, setJitsiReload] = useState(false);
+  // const [jitsi, setJitsi] = useState(false);
+  // const [jitsiReload, setJitsiReload] = useState(false);
   const [whiteCtrl, setWhiteCtrl] = useState(false);
   const [blackCtrl, setBlackCtrl] = useState(false);
   const [screenCtrl, setScreenCtrl] = useState(false)
@@ -445,7 +445,7 @@ const Room = ({onClose = () => {}}) => {
     const ctrlLstn = onSnapshot(doc(db, 'sessions', sessn?.id, 'live', 'ctrl'), async(snap) => {
       if (snap.exists()) {
         ctrlRef.current = snap.data();
-        setJitsi(ctrlRef.current.jitsi);
+        // setJitsi(ctrlRef.current.jitsi);
         setNotation(ctrlRef.current.shwCs);
         setShowPieces(ctrlRef.current.shwCn);
         setShowPawnStructure(ctrlRef.current.shwPn);
@@ -486,7 +486,7 @@ const Room = ({onClose = () => {}}) => {
 
     return () => {
       clockRef.current && clearInterval(clockRef.current);
-      if (sessn?.createdBy === user.id) sendData('ctrl', {jitsi: false});
+      // if (sessn?.createdBy === user.id) sendData('ctrl', {jitsi: false});
       infoLstn()
       userLstn()
       set(child(userRef, `/${user.id}`), {online: false})
@@ -537,7 +537,7 @@ const Room = ({onClose = () => {}}) => {
       </>}
       <ScrollView nestedScrollEnabled={true} showsVerticalScrollIndicator={false} overScrollMode='never'>
         {question ? user.role === 'G' ? <SolveQuestion question={question} answers={answers} onSolve={onSolve} /> : <ViewQuestion participants={participants} question={question} answers={answers} onClose={onEndQuestion} /> : undefined}
-        {/* {sessn?.video === 1 && <Jitsi />} */}
+        {sessn?.video === 1 && <Jitsi />}
         <ScrollView overScrollMode='never' style={{...s.mx8, ...s.mt4, ...s.mb8}} contentContainerStyle={s.g8} horizontal={true} showsHorizontalScrollIndicator={false}>
           {(host || showMoves) && <TouchableOpacity style={{...s.p8, ...s.br20, borderWidth: 2, borderColor: '#000', backgroundColor: tab === 1 ? '#F50057' : '#333'}} onPress={() => setTab(1)}>
             <Text style={{...s.cfff, ...s.fs15}}>MOVES</Text>
