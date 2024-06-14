@@ -4,6 +4,7 @@ import { KeyboardAvoidingView, ScrollView, Text, TextInput, TouchableOpacity, Vi
 import { arrayUnion, doc, increment, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { child, onDisconnect, onValue, ref, set, update } from 'firebase/database';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { Button, Dialog, Icon, Portal } from 'react-native-paper'
 import { db, rdb } from '../../firebase';
 import { createDoc, parseTime, saveAnswer, serverTime, timeOffset } from '../../service';
 import { startFen } from '../../constant';
@@ -503,6 +504,8 @@ const Room = ({onClose = () => {}}) => {
     setTimeout(() => setScreenCtrl(ctrlRef.current.sctrl === user?.id))
   }, [user])
 
+  const [exit, setExit] = useState(false)
+
   return (
     progress ? <Progress /> : <KeyboardAvoidingView style={{...s.f1, ...s.bc2}} behavior='padding' keyboardVerticalOffset={50}>
       {screenCtrl && <Sharescreen onRefresh={onShareScreenRefresh} />}
@@ -510,9 +513,21 @@ const Room = ({onClose = () => {}}) => {
       {showSettings && <Settings onClose={() => setShowSettings(false)} />}
       {showPosition && <Position fen={fen} orientation={side} onChange={onFenChange} />}
       {askQuestion && <AskQuestion {...askQuestion} onChange={onAskQuestion} />}
+      {exit && <Portal>
+        <Dialog visible onDismiss={() => setExit(false)}>
+          <Dialog.Content style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
+            <Icon source='location-exit' color='#F50057' size={24} />
+            <Text style={{...s.cfff, ...s.fs18}}>Are you sure you want to Exit?</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setExit(false)}>No</Button>
+            <Button onPress={() => onClose(sessn?.id, sesnRef.current?.start?.seconds)}>Yes</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>}
       <Header filter={false} title={sessn?.name} icon={<MaterialIcons name='live-tv' size={28} color='#87CEFA' />}>
         <Text style={{...s.cfff, ...s.fs18, ...s.mla}}>{parseTime(count)}</Text>
-        {sessn?.createdBy === user.id && <TouchableOpacity style={{...s.fdr, ...s.aic, ...s.p4, ...s.px8, ...s.br5, backgroundColor: '#87CEFA'}} onPress={() => onClose(sessn?.id)}>
+        {sessn?.createdBy === user.id && <TouchableOpacity style={{...s.fdr, ...s.aic, ...s.p4, ...s.px8, ...s.br5, backgroundColor: '#87CEFA'}} onPress={() => setExit(true)}>
           <Text>EXIT</Text>
         </TouchableOpacity>}
       </Header>

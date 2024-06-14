@@ -35,7 +35,7 @@ function Jitsi() {
   }, [loadData])
 
   return (
-    <View style={{height: 400}}>
+    <View style={{height: 200}}>
       {uri && <WebView useWebView2 originWhitelist={['*']} overScrollMode='never' allowsInlineMediaPlayback style={{height: '100%'}} source={{uri}} />}
     </View>
   )

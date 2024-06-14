@@ -176,7 +176,7 @@ const AskQuestion = ({fen=startFen, pgn='', ans='', onChange=()=>{}}) => {
                 placeholderTextColor='#666'
                 placeholder='Max Time (Seconds)'
                 value={time.value}
-                onChangeText={setTime}
+                onChangeText={(value) => setTime(t => ({...t, value}))}
                 style={{
                   ...s.p6,
                   ...s.px8,

@@ -20,7 +20,7 @@ const getQuery = ({ user = null, academy = null, role = null, from = null, to = 
   const field = !user ? 'academy' : role === 'G' ? 'participants' : 'createdBy';
   const match = field === 'participants' ? 'array-contains' : '==';
   const query = [
-    'sessions', [[field, match, field === 'academy' ? academy : user], ['status', '==', status],
+    'sessions', [[field, match, field === 'academy' ? academy : user], status === 3 ? ['status', '==', status] : ['status', 'in', [1, 2]],
     ['date', '>=', from], ['date', '<=', to]], [['date', status === 3 ? 'desc' : 'asc']]
   ];
   if (participant && role !== 'G') {
@@ -123,10 +123,11 @@ const Session = ({navigation}) => {
     setCreate(true);
   };
 
-  const onRoomClose = useCallback(async(data) => {
+  const onRoomClose = useCallback(async(docId, start) => {
     setSessn(null)
     setProgress(true)
-    const res = await changeDoc('sessions', data, {status: 3}, user?.id)
+    const time = await serverTime() - start
+    const res = await changeDoc('sessions', docId, {status: 3, time}, user?.id)
     if (res) {
       loadData()
     } else {
@@ -185,14 +186,11 @@ const Session = ({navigation}) => {
   const loadData = useCallback(async() => {
     if (!(fromDate && toDate)) return;
     setProgress(true);
-    const [INP, ACT] = await Promise.all([
-      getData(...getQuery({...filter, status: 1})),
-      getData(...getQuery({...filter, status: 2}))
-    ]);
+    const INP = await getData(...getQuery({...filter, status: 1}));
     const docs = await getData(...getQuery(filter));
     lastDoc.current = docs.at(-1);
     hasMore.current = docs.length === pageSize;
-    setDocs([...INP, ...ACT, ...docs].map(e => ({ ...e, d: parseDate(e.date), t: parseTime(e.time || 0) })));
+    setDocs([...INP, ...docs].map(e => ({ ...e, d: parseDate(e.date), t: parseTime(e.time || 0) })));
     setProgress(false);
   }, [filter]);
 
@@ -234,9 +232,9 @@ const Session = ({navigation}) => {
           <View style={{...s.f1, ...s.jcc, ...s.g8}}>
             <View style={{...s.fdr, ...s.aic, ...s.g8}}>
               <Text numberOfLines={2} style={{...s.f1, ...s.cfff, ...s.fs17}}>{item.name}</Text>
-              {(['C', 'E'].includes(user?.role) || settings.includes('3')) && <TouchableOpacity style={{...s.p8, ...s.mla}}>
+              {/* {(['C', 'E'].includes(user?.role) || settings.includes('3')) && <TouchableOpacity style={{...s.p8, ...s.mla}}>
                 <FontAwesome5 name='users' color='#FFF' size={22} />
-              </TouchableOpacity>}
+              </TouchableOpacity>} */}
             </View>
             <View style={{...s.fdr, ...s.aic, ...s.g4}}>
               <Chip type={item.status === 3 ? 'success' : item.status === 2 ? 'play' : 'pause'} text={item.status === 3 ? 'Completed' : item.status === 2 ? 'Yet To Start' : 'In progress'} />

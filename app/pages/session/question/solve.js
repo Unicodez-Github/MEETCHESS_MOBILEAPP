@@ -125,7 +125,7 @@ const SolveQuestion = ({question=null, answers=[], onSolve=()=>{}}) => {
         <Text style={{...s.cfff, ...s.fs16}} numberOfLines={1}>{question?.title}</Text>
         <Text style={{...s.cfff, ...s.fs18, ...s.mla}}>{parseTime(count)}</Text>
       </View>
-      <View style={{...s.my8, ...s.asc}}>
+      <View style={{...s.asc, height: 30, marginTop: 8}}>
         {status === 1 && <Chip type='success' text='Correct' />}
         {status === 2 && <Chip type='error' text='Incorrect' />}
         {status === 3 && <Chip type='success' text='Solved !' />}
