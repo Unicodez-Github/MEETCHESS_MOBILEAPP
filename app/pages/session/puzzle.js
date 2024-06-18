@@ -217,6 +217,8 @@ const Puzzle = ({open, index, onBack, onChange}) => {
         style={s.p8}
         refreshing={false}
         onRefresh={loadData}
+        nestedScrollEnabled={true}
+        scrollEnabled={false}
         ItemSeparatorComponent={() => <View style={{height: 8}} />}
         renderItem={({item, index}) => <Pressable style={{...s.fdr, ...s.bc3, ...s.br8, ...s.p8, ...s.g8}} onPress={() => onDbClick(item)}>
           <Text numberOfLines={1} style={{...s.f1, ...s.cfff, ...s.fs17}}>{++index}. {item.topic} ({item.count})</Text>

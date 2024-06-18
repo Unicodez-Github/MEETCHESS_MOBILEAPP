@@ -34,6 +34,7 @@ const defaultReport = {
 }
 
 export default function Solve({doc = null, onClose = () => {}}) {
+  const puzzles = useRef([])
   const timer = useRef()
   const tstcl = useRef()
   const count = useRef(0)
@@ -64,8 +65,8 @@ export default function Solve({doc = null, onClose = () => {}}) {
   }
 
   const selectNext = (data) => {
-    const ind = data + 1 <= activities.length - 1 ? data + 1 : 0;
-    const incomplete = activities.filter(e => e && !e.solved && !e.timeUp && !e.attemptUp);
+    const ind = data + 1 <= puzzles.current.length - 1 ? data + 1 : 0;
+    const incomplete = puzzles.current.filter(e => e && !e.solved && !e.timeUp && !e.attemptUp);
     if (incomplete && incomplete.length) {
       const nextAct = incomplete.find(e => e && e.id === `${e.activity}-${ind}`);
       if (nextAct) {
@@ -76,13 +77,13 @@ export default function Solve({doc = null, onClose = () => {}}) {
       }
     } else {
       tstcl.current && clearTimeout(tstcl.current)
-      const type = activities.find(e => e && !e.solved) ? 'info' : 'success';
+      const type = puzzles.current.find(e => e && !e.solved) ? 'info' : 'success';
       setToast({type, text: 'info' ? 'You have completed all the puzzles.' : 'You have solved all the puzzles.'});
     }
   };
 
   const saveAnswer = async(ans) => {
-    const act = activities.find(e => e.id === activity.current.id);
+    const act = puzzles.current.find(e => e.id === activity.current.id);
     if (ans) {
       act.answers.push(ans);
       act.solved = ans.s === 1;
@@ -126,7 +127,6 @@ export default function Solve({doc = null, onClose = () => {}}) {
     const { id } = await saveAssAnswer(answer, act.answerId);
     act.answerId = id;
     activity.current = act;
-    setActivities(e => [...e]);
 
     if (act.solved) {
       store.report.puzzlesSolved += 1;
@@ -146,18 +146,18 @@ export default function Solve({doc = null, onClose = () => {}}) {
 
   const onIndChange = (ind) => {
     setIndex(ind);
-    selectActivity(activities.find(e => e && e.id === `${e.activity}-${ind}`));
+    selectActivity(puzzles.current.find(e => e && e.id === `${e.activity}-${ind}`));
   };
 
   const onPrev = () => {
     const ind = index - 1 >= 0 ? index - 1 : 0
-    selectActivity(activities.find(e => e && e.id === `${e.activity}-${ind}`))
+    selectActivity(puzzles.current.find(e => e && e.id === `${e.activity}-${ind}`))
     setIndex(ind)
   }
 
   const onNext = () => {
-    const ind = index + 1 <= activities.length - 1 ? index + 1 : activities.length - 1
-    selectActivity(activities.find(e => e && e.id === `${e.activity}-${ind}`))
+    const ind = index + 1 <= puzzles.current.length - 1 ? index + 1 : puzzles.current.length - 1
+    selectActivity(puzzles.current.find(e => e && e.id === `${e.activity}-${ind}`))
     setIndex(ind)
   }
 
@@ -256,17 +256,18 @@ export default function Solve({doc = null, onClose = () => {}}) {
     store.report.puzzlesAttemptup = report ? report.puzzlesAttemptup : 0;
     store.report.pointsSecured = report ? report.pointsSecured : 0;
 
-    const activities = await getActivities(doc, user.id);
-    activities.forEach((e, i) => {
+    const actvtys = await getActivities(doc, user.id);
+    actvtys.forEach((e, i) => {
       e.id = `${e.activity}-${i}`;
-      e.isLast = i === activities.length - 1;
+      e.isLast = i === actvtys.length - 1;
     });
-    setActivities([...activities]);
+    puzzles.current = actvtys
+    setActivities(puzzles.current)
 
-    const solved = activities.filter(e => e && e.solved).length;
-    const timeUp = activities.filter(e => e && e.timeUp).length;
-    const attemptUp = activities.filter(e => e && e.attemptUp).length;
-    const points = activities.reduce((p, c) => p += c.score, 0);
+    const solved = puzzles.current.filter(e => e && e.solved).length;
+    const timeUp = puzzles.current.filter(e => e && e.timeUp).length;
+    const attemptUp = puzzles.current.filter(e => e && e.attemptUp).length;
+    const points = puzzles.current.reduce((p, c) => p += c.score, 0);
 
     if (store.report.puzzlesSolved !== solved) {
       store.report.puzzlesSolved = solved;
@@ -290,16 +291,16 @@ export default function Solve({doc = null, onClose = () => {}}) {
 
     await updateReport();
 
-    const incomplete = activities.find(e => e && !e.solved && !e.timeUp && !e.attemptUp);
+    const incomplete = puzzles.current.find(e => e && !e.solved && !e.timeUp && !e.attemptUp);
     if (incomplete) {
       const [_, i] = incomplete.id.split('-');
       setIndex(+i);
       selectActivity(incomplete);
     } else {
       setIndex(0);
-      selectActivity(activities[0]);
+      selectActivity(puzzles.current[0]);
       tstcl.current && clearTimeout(tstcl.current)
-      const type = activities.find(e => e && !e.solved) ? 'info' : 'success';
+      const type = puzzles.current.find(e => e && !e.solved) ? 'info' : 'success';
       setToast({type, text: 'info' ? 'You have completed all the puzzles.' : 'You have solved all the puzzles.'});
     }
     

@@ -152,10 +152,10 @@ const Room = ({onClose = () => {}}) => {
         time: Date.now()
       });
       if (tab === 2) {
-        sendData('chat', {msges: data});
+        sendData('ctrl', {msges: data});
       } else if (tab === 3) {
-        sendData('chat', {rspns: data});
-      }
+        sendData('ctrl', {rspns: data});
+      } setMessage('')
     }
   };
 
@@ -248,7 +248,7 @@ const Room = ({onClose = () => {}}) => {
   }, []);
 
   const onResponse = useCallback((data) => {
-    sendData('chat', { rspns: data });
+    sendData('ctrl', { rspns: data });
   }, []);
 
   const onMove = useCallback((index) => sendData('move', {index, z: increment(1)}), []);
@@ -531,26 +531,26 @@ const Room = ({onClose = () => {}}) => {
           <Text>EXIT</Text>
         </TouchableOpacity>}
       </Header>
-      {!question && <>
-        <Board
-          sidetoplay
-          drag={mode === 1 && (host || (whiteCtrl && game.turn() === 'w') || (blackCtrl && game.turn() === 'b') || (!legalMove && (whiteCtrl || blackCtrl)))}
-          draw={mode === 2 && (host || (whiteCtrl && game.turn() === 'w') || (blackCtrl && game.turn() === 'b') || (!legalMove && (whiteCtrl || blackCtrl)))}
-          coordinate={notation}
-          orientation={side}
-          invalidmove={!legalMove}
-          fen={user?.role !== 'G' ? (showPawnStructure ? getPawnStructure(fen) : fen) : (showPieces ? (showPawnStructure ? getPawnStructure(fen) : fen) : '8/8/8/8/8/8/8/8 w - - 0 1')}
-          lastmove={lastMove}
-          symbols={arrows}
-          pmoves={(legalMove && showLegalMoves) ? squares : []}
-          onDrag={onDrag}
-          onDrop={onDrop}
-          onDraw={onDraw}
-        />
-        <Tool role={user.role} active={activeTools} onPress={onToolPress} />
-        {host && <Puzzle onChange={onPuzzleChange} />}
-      </>}
       <ScrollView nestedScrollEnabled={true} showsVerticalScrollIndicator={false} overScrollMode='never'>
+        {!question && <>
+          <Board
+            sidetoplay
+            drag={mode === 1 && (host || (whiteCtrl && game.turn() === 'w') || (blackCtrl && game.turn() === 'b') || (!legalMove && (whiteCtrl || blackCtrl)))}
+            draw={mode === 2 && (host || (whiteCtrl && game.turn() === 'w') || (blackCtrl && game.turn() === 'b') || (!legalMove && (whiteCtrl || blackCtrl)))}
+            coordinate={notation}
+            orientation={side}
+            invalidmove={!legalMove}
+            fen={user?.role !== 'G' ? (showPawnStructure ? getPawnStructure(fen) : fen) : (showPieces ? (showPawnStructure ? getPawnStructure(fen) : fen) : '8/8/8/8/8/8/8/8 w - - 0 1')}
+            lastmove={lastMove}
+            symbols={arrows}
+            pmoves={(legalMove && showLegalMoves) ? squares : []}
+            onDrag={onDrag}
+            onDrop={onDrop}
+            onDraw={onDraw}
+          />
+          <Tool role={user.role} active={activeTools} onPress={onToolPress} />
+          {host && <Puzzle onChange={onPuzzleChange} />}
+        </>}
         {question ? user.role === 'G' ? <SolveQuestion question={question} answers={answers} onSolve={onSolve} /> : <ViewQuestion participants={participants} question={question} answers={answers} onClose={onEndQuestion} /> : undefined}
         {sessn?.video === 1 && <Jitsi />}
         <ScrollView overScrollMode='never' style={{...s.mx8, ...s.mt4, ...s.mb8}} contentContainerStyle={s.g8} horizontal={true} showsHorizontalScrollIndicator={false}>
@@ -582,7 +582,7 @@ const Room = ({onClose = () => {}}) => {
           {(tab === 5 && host) && <Participant participants={participants} onControl={onControl} />}
           {(tab === 6 && host) && <Engine fen={fen} />}
         </ScrollView>
-        {[2, 3].includes(tab) && <View style={{...s.mx8, ...s.fdr, ...s.aic, ...s.g8}}>
+        {(tab === 2 || (tab === 3 && !host)) && <View style={{...s.mx8, ...s.fdr, ...s.aic, ...s.g8}}>
           <TextInput
             placeholderTextColor='#CCC'
             placeholder='Type Here...'
