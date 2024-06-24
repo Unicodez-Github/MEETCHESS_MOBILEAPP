@@ -4,11 +4,11 @@ import { KeyboardAvoidingView, ScrollView, Text, TextInput, TouchableOpacity, Vi
 import { arrayUnion, doc, increment, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { child, onDisconnect, onValue, ref, set, update } from 'firebase/database';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
-import { Button, Dialog, Icon, Portal } from 'react-native-paper'
+import { Button, Dialog, Icon, Portal, Snackbar } from 'react-native-paper'
 import { db, rdb } from '../../firebase';
 import { createDoc, parseTime, saveAnswer, serverTime, timeOffset } from '../../service';
 import { startFen } from '../../constant';
-import { Header, Progress } from '../../factory';
+import { Header, Progress, Toast } from '../../factory';
 import { Game, getPawnStructure } from '../../chess';
 import { SessnState, SetngState, UserState, UsersState } from '../../state';
 import Board from '../../cboard';
@@ -531,6 +531,9 @@ const Room = ({onClose = () => {}}) => {
           <Text>EXIT</Text>
         </TouchableOpacity>}
       </Header>
+      {(whiteCtrl || blackCtrl) && <View style={[s.aic, s.mb8]}>
+        <Toast text={(whiteCtrl && blackCtrl) ? 'You can move Both' : whiteCtrl ? 'You can move White' : 'You can move Black'} />
+      </View>}
       <ScrollView nestedScrollEnabled={true} showsVerticalScrollIndicator={false} overScrollMode='never'>
         {!question && <>
           <Board

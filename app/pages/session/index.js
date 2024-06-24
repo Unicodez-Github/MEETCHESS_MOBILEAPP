@@ -15,6 +15,7 @@ import Filter from './filter';
 import { IconButton, Snackbar } from 'react-native-paper';
 import Delete from './delete';
 import Room from './room';
+import SessView from './view';
 
 const getQuery = ({ user = null, academy = null, role = null, from = null, to = null, participant = null, status = 3 }) => {
   const field = !user ? 'academy' : role === 'G' ? 'participants' : 'createdBy';
@@ -76,6 +77,7 @@ const Session = ({navigation}) => {
   const [sessn, setSessn] = useRecoilState(SessnState);
   const [create, setCreate] = useState(false);
   const [remove, setRemove] = useState(null);
+  const [view, setView] = useState()
 
   const joinSession = async(data) => {
     const room = await getDocs(collection(db, 'sessions', data.id, 'live'));
@@ -196,7 +198,7 @@ const Session = ({navigation}) => {
 
   useEffect(() => {
     loadData();
-  }, [filter]);
+  }, [filter, sessn]);
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -205,6 +207,8 @@ const Session = ({navigation}) => {
     })
     return () => backHandler.remove()
   }, [])
+
+  if (view) return <SessView doc={view} onClose={() => setView()} />
   
   return (
     progress ? <Progress /> : create ? <Create onClose={onCreateClose} /> : sessn ? <Room onClose={onRoomClose} /> : <View style={{...s.f1, ...s.bc2}}>
@@ -240,7 +244,7 @@ const Session = ({navigation}) => {
               <Chip type={item.status === 3 ? 'success' : item.status === 2 ? 'play' : 'pause'} text={item.status === 3 ? 'Completed' : item.status === 2 ? 'Yet To Start' : 'In progress'} />
               <View style={s.mla} />
               {(item.status !== 3) && <Button type='success' title='JOIN' onPress={() => onJoinPress(item)} />}
-              {((user.role !== 'D' || settings.includes('3')) && item.status === 3) && <Button title='VIEW' />}
+              {((user.role !== 'D' || settings.includes('3')) && item.status === 3) && <Button title='VIEW' onPress={() => setView(item)} />}
               {(['C', 'E'].includes(user?.role) || settings.includes('4')) && <IconButton containerColor='#F50057AA' mode='contained-tonal' icon='delete-outline' onPress={() => setRemove(item?.id)} />}
             </View>
           </View>

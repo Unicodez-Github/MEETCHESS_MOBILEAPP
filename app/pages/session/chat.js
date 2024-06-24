@@ -1,12 +1,11 @@
-import { Text, View, useWindowDimensions } from 'react-native'
+import { Text, View } from 'react-native'
 import { useRecoilValue } from 'recoil'
 import { memo } from 'react'
 import { UserState } from '../../state'
-import RenderHtml from 'react-native-render-html'
+import HTMLView from 'react-native-htmlview'
 import s from '../../style'
 
 function Chat({messages = []}) {
-  const { width } = useWindowDimensions()
   const user = useRecoilValue(UserState)
   
   return (
@@ -27,7 +26,7 @@ function Chat({messages = []}) {
         }} />
         <View style={{...s.px8, ...s.br8, paddingTop: 4, paddingBottom: 6, backgroundColor: e.user === user?.id ? '#F0F8FF' : '#ADD8E6'}}>
           <Text>{e.user === user?.id ? 'You' : e.name}</Text>
-          <View style={s.mt4}><RenderHtml source={{html: e.message}} contentWidth={width} /></View>
+          <View style={s.mt4}><HTMLView value={e.message} /></View>
         </View>
       </View>)}
     </View>

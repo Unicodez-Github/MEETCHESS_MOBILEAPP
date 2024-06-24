@@ -29,7 +29,7 @@ export default function Tournament() {
   const [live, setLive] = useState(null)
 
   const onLiveClose = (reload) => {
-    reload && loadData()
+    loadData()
     setLive(null)
   }
 

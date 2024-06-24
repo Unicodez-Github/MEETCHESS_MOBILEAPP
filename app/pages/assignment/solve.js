@@ -138,7 +138,7 @@ export default function Solve({doc = null, onClose = () => {}}) {
     if (activity.current.solved) {
       timer.current && clearInterval(timer.current);
       const [_, i] = activity.current.id.split('-');     
-      setTimeout(() => selectNext(i), 750);
+      setTimeout(() => selectNext(+i), 500);
     }
 
     if (!ans) return 'TIMEUPDATED';
@@ -191,7 +191,7 @@ export default function Solve({doc = null, onClose = () => {}}) {
             setDrag(false);
             saveAnswer({ f: game.fen(), m: pgn, t: time, s: status });
           }
-        }, 1000);
+        }, 750);
       }
     } else if (status === 0) {
       showAlert('error');
@@ -380,7 +380,7 @@ export default function Solve({doc = null, onClose = () => {}}) {
             </View>
             <Text variant='bodyLarge' style={s.mb8}>{pgn}</Text>
             <ScrollView ref={scrollRef} overScrollMode='never' contentContainerStyle={s.g8} horizontal={true} showsHorizontalScrollIndicator={false}>
-              {activities.map((_, e) => <TouchableOpacity key={e} style={{height: 52, width: 52, ...s.aic, ...s.jcc, ...s.br8, backgroundColor: index === e ? '#4169E1' : '#222'}} onPress={() => onIndChange(e)}>
+              {activities.map((a, e) => <TouchableOpacity key={e} style={{height: 52, width: 52, ...s.aic, ...s.jcc, ...s.br8, backgroundColor: index === e ? '#4169E1' : a?.solved ? 'green' : a?.answers?.length ? 'red' : '#222'}} onPress={() => onIndChange(e)}>
                 <Text variant='titleMedium'>{e + 1}</Text>
               </TouchableOpacity>)}
             </ScrollView>

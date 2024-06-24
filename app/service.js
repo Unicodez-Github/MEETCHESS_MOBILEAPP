@@ -6,12 +6,11 @@ import { pageSize } from './constant';
 import dayjs from 'dayjs';
 
 import { Audio } from 'expo-av'
-
+const capSound = require('../assets/sounds/cap.mp3')
+const movSound = require('../assets/sounds/mov.mp3')
 export async function playSound(cap) {
-  const capSound = require('../assets/sounds/cap.mp3')
-  const movSound = require('../assets/sounds/mov.mp3')
   const audio  = await Audio.Sound.createAsync(cap ? capSound : movSound)
-  audio.sound.playAsync()
+  await audio.sound.playAsync()
 }
 
 export const create = (data, user) => ({

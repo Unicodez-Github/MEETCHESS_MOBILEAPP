@@ -1,11 +1,10 @@
-import { Text, TouchableOpacity, View, useWindowDimensions } from 'react-native'
+import { Text, TouchableOpacity, View } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
 import { memo } from 'react'
-import RenderHtml from 'react-native-render-html'
+import HTMLView from 'react-native-htmlview'
 import s from '../../style'
 
 function Response({responds = [], onResponse = () => {}}) {
-  const { width } = useWindowDimensions()
 
   const sendFeedBack = (data, res) => {
     onResponse(responds.map(e => {
@@ -20,10 +19,10 @@ function Response({responds = [], onResponse = () => {}}) {
       {[...responds].reverse().map((e, i) => <View key={i} style={{marginBottom: 12}}>
         <View style={{...s.fdr, ...s.aic}}>
           <View style={{...s.p8, ...s.br5, backgroundColor: '#FFF', color: '#555'}}>
-            <RenderHtml source={{html: e.message}} contentWidth={width} />
+            <HTMLView value={e.message} />
           </View>
           {e.feedBack ? <View style={{...s.fdr, ...s.aic, ...s.g8, ...s.p8}}>
-            {e.feedBack === 'YES' ? <MaterialIcons name='thumb-up-alt' color='#FFC400' size={24} /> : <MaterialIcons name='thumb-down-alt' color='#FFC400' size={24} />}
+            {e.feedBack === 'YES' ? <MaterialIcons name='thumb-up-alt' color='#FFC400' size={24} /> : e.feedBack === 'NO' ? <MaterialIcons name='thumb-down-alt' color='#FFC400' size={24} /> : <Text style={s.cfff}>{e.feedBack}</Text>}
           </View> : <View style={{...s.fdr, ...s.aic, ...s.g8, ...s.p8}}>
             <TouchableOpacity onPress={() => sendFeedBack(e, 'YES')}>
               <MaterialIcons name='thumb-up-off-alt' color='#FFC400' size={24} />

@@ -20,6 +20,7 @@ const getQuery = ({id = null, role = null, from = null, to = null}) => {
 }
 
 export default function Assignment() {
+  const selected = useRef()
   const user = useRecoilValue(UserState)
   const lastDoc = useRef(null)
   const hasMore = useRef(false)
@@ -29,7 +30,8 @@ export default function Assignment() {
   const [solve, setSolve] = useState(null)
 
   const onSolveClose = (reload) => {
-    reload && loadData()
+    selected.current = solve?.id
+    loadData()
     setSolve(null)
   }
 
@@ -86,7 +88,7 @@ export default function Assignment() {
           refreshing={false}
           onRefresh={loadData}
           ItemSeparatorComponent={() => <View style={{height: 8}} />}
-          renderItem={({item}) => <View style={{...s.fdr, ...s.bc3, ...s.br8, ...s.p8, ...s.g8}}>
+          renderItem={({item}) => <View style={{...s.fdr, ...s.br8, ...s.p8, ...s.g8, backgroundColor: selected.current === item.id ? '#666' : '#333'}}>
           <Date {...item.d} />
           <View style={{...s.f1, ...s.jcc, ...s.g8}}>
             <View style={{...s.fdr, ...s.aic, ...s.g4}}>
