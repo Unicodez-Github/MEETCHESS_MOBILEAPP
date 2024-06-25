@@ -11,8 +11,8 @@ import { apiCall, db, rdb } from '../../firebase'
 import { Empty, Progress, Toast } from '../../factory'
 import { emptyFen, Game } from '../../chess'
 import { UserState, UsersState } from '../../state'
+import { Board } from '../chess'
 import Counter from '../../counter'
-import Board from '../../cboard'
 import s from '../../style'
 import dayjs from 'dayjs'
 
@@ -130,22 +130,23 @@ export default function Live({docId = null, onClose = () => {}}) {
     blackCountRef.current = data
   }, [])
 
-  const onDrop = useCallback((from, to) => {
+  const onDrop = useCallback(({piece, ...data}) => {
     if (!result && board) {
-      const move = game.move({from, to})
-      if (!move) return false
-      if (game.isGameOver() || movesRef.current.map(e => e.f).filter(e => e.startsWith(move.f.split(' ').slice(0, 3).join(' '))).length >= 3) {
-        setWhitePause(true)
-        setBlackPause(true)
-      } else {
-        const turn = game.turn()
-        setWhitePause(turn === 'b')
-        setBlackPause(turn === 'w')
+      if (data?.from && data?.to && piece && data?.from !== data?.to) {
+        const move = game.move(data)
+        if (!move) return 'back'
+        if (game.isGameOver() || movesRef.current.map(e => e.f).filter(e => e.startsWith(move.f.split(' ').slice(0, 3).join(' '))).length >= 3) {
+          setWhitePause(true)
+          setBlackPause(true)
+        } else {
+          const turn = game.turn()
+          setWhitePause(turn === 'b')
+          setBlackPause(turn === 'w')
+        }
+        setMove(move)
+        setFen(game.fen())
+        setLastMove(move)
       }
-      setMove(move)
-      setFen(game.fen())
-      setLastMove(move)
-      return true
     }
   }, [result, board])
 
@@ -440,17 +441,16 @@ export default function Live({docId = null, onClose = () => {}}) {
           <View style={{...s.fdr, ...s.aic, ...s.jcc, ...s.p8, ...s.bc2, height: 48}}>
             {result ? <Toast type='success' text={result === '1-0' ? 'White wins the game!' : result === '0-1' ? 'Black wins the game!' : result === '1/2-1/2' ? 'Game drawn!' : 'Completed'} /> : msg ? <Toast {...msg} /> : undefined}
           </View>
-          {board ? <ScrollView overScrollMode='never' style={{...s.mx8, ...s.mt8}}>
+          {board ? <ScrollView overScrollMode='never'>
             <Text numberOfLines={1} style={{...s.mb8, ...s.asc}} variant='titleMedium'>
               {orientation === 'b' ? students.find(p => p.id === board.white)?.name || 'White' : students.find(p => p.id === board.black)?.name || 'Black'} (<Counter mode='down' start={orientation === 'b' ? whiteClock : blackClock} pause={orientation === 'b' ? whitePause : blackPause} onPause={orientation === 'b' ? onWhiteClockPause : onBlackClockPause} onEnd={orientation === 'b' ? onWhiteClockEnd : onBlackClockEnd} />)
             </Text>
             <View style={{pointerEvents: 'auto'}}>
               <Board
-                sidetoplay
-                drag={((whiteCtrl && game.turn() === 'w') || (blackCtrl && game.turn() === 'b')) && !result}
+                draggable={((whiteCtrl && game.turn() === 'w') || (blackCtrl && game.turn() === 'b')) && !result}
                 orientation={orientation}
                 fen={fen}
-                lastmove={lastMove}
+                lastMove={lastMove}
                 onDrop={onDrop}
               />
             </View>

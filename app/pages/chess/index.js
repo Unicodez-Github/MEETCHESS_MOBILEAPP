@@ -1,7 +1,7 @@
 import { View, useWindowDimensions } from 'react-native'
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { WebView } from 'react-native-webview'
-import s from '../style'
+import s from '../../style'
 
 export const emptyFen = '8/8/8/8/8/8/8/8 w - - 0 1'
 
@@ -228,7 +228,7 @@ function Chessboard({
   }, [ready, allowPlaySound])
 
   return (
-    <View style={[s.asc, width, height]}>
+    <View style={[s.asc, {width, height}]}>
       <WebView useWebView2 ref={board}
         style={{backgroundColor: 'transparent'}}
         pointerEvents='none'

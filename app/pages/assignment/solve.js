@@ -1,17 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
 import { View, BackHandler, ScrollView, TouchableOpacity } from 'react-native'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { IconButton, Portal, Text } from 'react-native-paper'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useRecoilValue } from 'recoil'
-import { UserState } from '../../state'
-import { emptyFen, Game } from '../../chess'
 import { getActivities, getReport, parseTime, saveAssAnswer, saveReport } from '../../service'
 import { Progress, Toast } from '../../factory'
-import Board from '../../cboard'
+import { emptyFen, Game } from '../../chess'
+import { UserState } from '../../state'
+import { Board } from '../chess'
 import s from '../../style'
-
-const game = new Game()
 
 const getPgn = (moves) => {
   return moves.filter(m => m && m.s && m.i && m.i !== '_').map(m => {
@@ -34,6 +32,7 @@ const defaultReport = {
 }
 
 export default function Solve({doc = null, onClose = () => {}}) {
+  const game = useRef(new Game()).current
   const puzzles = useRef([])
   const timer = useRef()
   const tstcl = useRef()
@@ -168,35 +167,36 @@ export default function Solve({doc = null, onClose = () => {}}) {
     return () => clearTimeout(tstcl.current);
   }
 
-  const onDrop = useCallback((from, to) => {
-    const res = game.solve({from, to})
-    if (!res) return false;
-    const { status, move, next } = res;
-
-    if (status === 1) {
-      showAlert('success');
-      const pgn = game.pgn(); setPgn(pgn);
-      setFen(game.fen());
-      setLastMove({ ...{ from: move.from, to: move.to } });
-      if (move.i === activity.current.last || !next || (move && next && move.i && next.i && move.i.split('-').length !== next.i.split('-').length)) {
-        setDrag(false);
-        saveAnswer({ f: game.fen(), m: pgn, t: time, s: status });
-      } else if (next) {
-        setTimeout(() => {
-          const res = game.solve({ s: next.s });
-          const pgn = game.pgn(); setPgn(pgn);
-          setFen(game.fen());
-          setLastMove({ ...{ from: res.move.from, to: res.move.to } });
-          if (res.move.i === activity.current.last || (res && !res.next) || (res && res.move && res.next && res.move.i && res.next.i && res.move.i.split('-').length !== res.next.i.split('-').length)) {
-            setDrag(false);
-            saveAnswer({ f: game.fen(), m: pgn, t: time, s: status });
-          }
-        }, 750);
+  const onDrop = useCallback(({piece, ...data}) => {
+    if (data?.from && data?.to && piece && data?.from !== data?.to) {
+      const res = game.solve(data)
+      if (!res) return 'back'
+      const { status, move, next } = res
+      if (status === 1) {
+        showAlert('success');
+        const pgn = game.pgn(); setPgn(pgn);
+        setFen(game.fen());
+        setLastMove(move);
+        if (move.i === activity.current.last || !next || (move && next && move.i && next.i && move.i.split('-').length !== next.i.split('-').length)) {
+          setDrag(false);
+          saveAnswer({ f: game.fen(), m: pgn, t: time, s: status });
+        } else if (next) {
+          setTimeout(() => {
+            const res = game.solve({ s: next.s });
+            const pgn = game.pgn(); setPgn(pgn);
+            setFen(game.fen());
+            setLastMove(res.move);
+            if (res.move.i === activity.current.last || (res && !res.next) || (res && res.move && res.next && res.move.i && res.next.i && res.move.i.split('-').length !== res.next.i.split('-').length)) {
+              setDrag(false);
+              saveAnswer({ f: game.fen(), m: pgn, t: time, s: status });
+            }
+          }, 750);
+        }
+      } else if (status === 0) {
+        showAlert('error');
+        saveAnswer({ f: move.f, m: move.p, t: time, s: status });
+        return 'back'
       }
-    } else if (status === 0) {
-      showAlert('error');
-      saveAnswer({ f: move.f, m: move.p, t: time, s: status });
-      return 'back';
     }
   }, [])
 
@@ -330,8 +330,10 @@ export default function Solve({doc = null, onClose = () => {}}) {
   }, [time]);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({x: 60 * index, y: 0, animated: true})
-  }, [index])
+    if (!progress && activities.length) {
+      setTimeout(() => scrollRef.current?.scrollTo({x: 60 * index, y: 0, animated: true}))
+    }
+  }, [index, activities, progress])
 
   const close = async() => {
     if (count.current > 0 && activity.current && !activity.current.solved && !activity.current.timeUp && !activity.current.attemptUp) await saveAnswer();
@@ -362,14 +364,13 @@ export default function Solve({doc = null, onClose = () => {}}) {
           <View style={{...s.fdr, ...s.aic, ...s.jcc, ...s.p8, ...s.bc2, height: 48}}>
             {timeUp ? <Toast type='error' text='You have exceeded max time limit' /> : attemptUp ? <Toast type='error' text='You have exceeded max attempt limit' /> : toast ? <Toast {...toast} /> : undefined}
           </View>
-          <ScrollView style={{...s.mx8, ...s.mt8}} overScrollMode='never'>
+          <ScrollView overScrollMode='never'>
             <View style={{pointerEvents: 'auto'}}>
               <Board
-                sidetoplay
-                drag={drag}
-                orientation={orientation}
                 fen={fen}
-                lastmove={lastMove}
+                orientation={orientation}
+                draggable={drag}
+                lastMove={lastMove}
                 onDrop={onDrop}
               />
             </View>
