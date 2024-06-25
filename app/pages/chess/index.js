@@ -228,7 +228,7 @@ function Chessboard({
   }, [ready, allowPlaySound])
 
   return (
-    <View style={{...s.asc, width, height}}>
+    <View style={[s.asc, width, height]}>
       <WebView useWebView2 ref={board}
         style={{backgroundColor: 'transparent'}}
         pointerEvents='none'
