@@ -33,7 +33,9 @@
     "react-native-svg": "15.2.0",
     "react-native-webrtc": "^118.0.3",
     "react-native-webview": "13.8.6",
-    "recoil": "^0.7.7"
+    "recoil": "^0.7.7",
+    "expo-file-system": "~17.0.1",
+    "expo-asset": "~10.0.9"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

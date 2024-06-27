@@ -44,6 +44,8 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "expo-asset",
+      "expo-file-system",
       "expo-av",
       "expo-camera",
       "./plugins/service",
@@ -53,7 +55,8 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "extra": {
       "eas": {

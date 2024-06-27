@@ -1,6 +1,8 @@
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View, useWindowDimensions } from 'react-native'
-import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { readAsStringAsync } from 'expo-file-system'
 import { WebView } from 'react-native-webview'
+import { useAssets } from 'expo-asset'
 import s from '../../style'
 
 export const emptyFen = '8/8/8/8/8/8/8/8 w - - 0 1'
@@ -17,11 +19,21 @@ function Chessfen({
     showCoordinate: false, showCurrentPlay: false, draggable: false,
     drawable: false, showPromotion: false, allowIllegalMove: false
   }), board = useRef()
+  const [asset] = useAssets(require('./board.html'))
+  const [html, setHtml] = useState()
   const [ready, setReady] = useState(false)
 
   const onLoad = () => {
     setReady(true), board.current?.postMessage(JSON.stringify({type: 0, data: props.current}))
   }
+
+  const getHtml = useCallback(async() => {
+    if (asset?.length) setHtml(await readAsStringAsync(asset[0]?.localUri))
+  }, [asset])
+
+  useEffect(() => {
+    getHtml()
+  }, [getHtml])
 
   useEffect(() => {
     if (ready && props.current.color !== color) {
@@ -70,9 +82,10 @@ function Chessfen({
       style={{backgroundColor: 'transparent'}}
       pointerEvents='none'
       overScrollMode='never'
+      originWhitelist={['*']}
       scrollEnabled={false}
       onLoad={onLoad}
-      source={require('./board.html')}
+      source={{html}}
     />
   )
 }
@@ -91,8 +104,10 @@ function Chessboard({
     color, sparePieces, showCoordinate, showCurrentPlay, draggable,
     drawable, showPromotion, allowPlaySound, allowIllegalMove
   }), board = useRef(), dimns = useWindowDimensions()
-  const [ready, setReady] = useState(false)
+  const [asset] = useAssets(require('./board.html'))
+  const [html, setHtml] = useState()
   const [height, setHeight] = useState()
+  const [ready, setReady] = useState(false)
 
   const width = useMemo(() => Math.min(dimns.width, dimns.height), [dimns.width, dimns.height])
 
@@ -121,6 +136,14 @@ function Chessboard({
       onFen(data)
     }
   }
+
+  const getHtml = useCallback(async() => {
+    if (asset?.length) setHtml(await readAsStringAsync(asset[0]?.localUri))
+  }, [asset])
+
+  useEffect(() => {
+    getHtml()
+  }, [getHtml])
 
   useEffect(() => {
     if (ready && props.current.color !== color) {
@@ -233,11 +256,12 @@ function Chessboard({
         style={{backgroundColor: 'transparent'}}
         pointerEvents='none'
         overScrollMode='never'
+        originWhitelist={['*']}
         scrollEnabled={false}
         onLoad={onLoad}
         onMessage={onMessage}
         onTouchStart={onTouch}
-        source={require('./board.html')}
+        source={{html}}
       />
     </View>
   )
