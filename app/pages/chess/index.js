@@ -3,6 +3,7 @@ import { View, useWindowDimensions } from 'react-native'
 import { readAsStringAsync } from 'expo-file-system'
 import { WebView } from 'react-native-webview'
 import { useAssets } from 'expo-asset'
+import { Loader } from '../../factory'
 import s from '../../style'
 
 export const emptyFen = '8/8/8/8/8/8/8/8 w - - 0 1'
@@ -77,16 +78,14 @@ function Chessfen({
     }
   }, [ready, allowPlaySound])
 
-  return (
-    <WebView useWebView2 ref={board}
-      style={{backgroundColor: 'transparent'}}
-      pointerEvents='none'
-      overScrollMode='never'
-      originWhitelist={['*']}
-      scrollEnabled={false}
-      onLoad={onLoad}
-      source={{html}}
-    />
+  return (html ? <WebView useWebView2 ref={board}
+    style={{backgroundColor: 'transparent'}}
+    pointerEvents='none'
+    overScrollMode='never'
+    originWhitelist={['*']}
+    scrollEnabled={false}
+    onLoad={onLoad}
+    source={{html}} /> : <Loader />
   )
 }
 
@@ -104,13 +103,12 @@ function Chessboard({
     color, sparePieces, showCoordinate, showCurrentPlay, draggable,
     drawable, showPromotion, allowPlaySound, allowIllegalMove
   }), board = useRef(), dimns = useWindowDimensions()
+  const width = useMemo(() => Math.min(dimns.width, dimns.height), [dimns.width, dimns.height])
+  const [height, setHeight] = useState(width)
+  const [ready, setReady] = useState(false)
   const [asset] = useAssets(require('./board.html'))
   const [html, setHtml] = useState()
-  const [height, setHeight] = useState()
-  const [ready, setReady] = useState(false)
-
-  const width = useMemo(() => Math.min(dimns.width, dimns.height), [dimns.width, dimns.height])
-
+  
   const onLoad = () => {
     setReady(true), board.current?.postMessage(JSON.stringify({type: 0, data: props.current}))
   }
@@ -252,7 +250,7 @@ function Chessboard({
 
   return (
     <View style={[s.asc, {width, height}]}>
-      <WebView useWebView2 ref={board}
+      {html ? <WebView useWebView2 ref={board}
         style={{backgroundColor: 'transparent'}}
         pointerEvents='none'
         overScrollMode='never'
@@ -262,7 +260,7 @@ function Chessboard({
         onMessage={onMessage}
         onTouchStart={onTouch}
         source={{html}}
-      />
+      /> : <Loader />}
     </View>
   )
 }
