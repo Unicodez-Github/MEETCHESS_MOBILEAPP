@@ -31,6 +31,7 @@ import Settings from './settings';
 import dayjs from 'dayjs';
 import AddParticipant from './addparticipant';
 import Sharescreen from './sharescreen';
+import Curriculum from './curriculum'
 
 const getPgn = (moves) => {
   return moves.filter(m => m && m.s && m.i && m.i !== '_').map(m => {
@@ -228,6 +229,13 @@ const Room = ({onClose = () => {}}) => {
     }
   };
 
+  const [showCurr, setshowCurr] = useState(false)
+
+  const onCurriculumChange = useCallback((data) => {
+    setshowCurr(false)
+    onGameLoad(data)
+  }, [])
+
   const onPuzzleChange = useCallback((type, data) => {
     if (data) {
       if (type === 1) {
@@ -371,6 +379,8 @@ const Room = ({onClose = () => {}}) => {
       setAddParticipant(true)
     } else if (data === 'UND') {
       onUndo()
+    } else if (data === 'CUR') {
+      setshowCurr(true)
     }
   }, []);
 
@@ -525,6 +535,7 @@ const Room = ({onClose = () => {}}) => {
           </Dialog.Actions>
         </Dialog>
       </Portal>}
+      <Curriculum open={showCurr} onChange={onCurriculumChange} onClose={() => setshowCurr(false)} />
       <Header filter={false} title={sessn?.name} icon={<MaterialIcons name='live-tv' size={28} color='#87CEFA' />}>
         <Text style={{...s.cfff, ...s.fs18, ...s.mla}}>{parseTime(count)}</Text>
         {sessn?.createdBy === user.id && <TouchableOpacity style={{...s.fdr, ...s.aic, ...s.p4, ...s.px8, ...s.br5, backgroundColor: '#87CEFA'}} onPress={() => setExit(true)}>
